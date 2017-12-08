@@ -1,5 +1,12 @@
 FROM debian:stretch-slim
 
+MAINTAINER zhengh@goodrain.com
+
+ENV DEBUG=1
+
+#update timezone
+ENV TZ=Asia/Shanghai
+
 # persistent / runtime deps
 ENV PHPIZE_DEPS \
 		autoconf \
@@ -109,7 +116,7 @@ RUN set -xe \
 		ln -sT "/usr/include/$debMultiarch/curl" /usr/local/include/curl; \
 	fi \
 	&& ./configure \
-		--prefix=/opt/goodrain/ruby-$PHP_VERSION 
+		--prefix=/opt/goodrain/php-$PHP_VERSION \
 		--build="$gnuArch" \
 		--with-config-file-path="$PHP_INI_DIR" \
 		--with-config-file-scan-dir="$PHP_INI_DIR/conf.d" \
@@ -134,6 +141,11 @@ RUN set -xe \
 		--with-libdir="lib/$debMultiarch" \
 		\
 		$PHP_EXTRA_CONFIGURE_ARGS \
+
+	&& export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/goodrain/php-$PHP_VERSION " \
+	&& ln -s /opt/goodrain/php-$PHP_VERSION/bin/php /usr/local/bin/php \
+	&& ln -s /opt/goodrain/php-$RUBY_VERSION/bin/pecl /usr/local/bin/pecl \
+
 	&& make -j "$(nproc)" \
 	&& make install \
 	&& { find /usr/local/bin /usr/local/sbin -type f -executable -exec strip --strip-all '{}' + || true; } \

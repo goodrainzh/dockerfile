@@ -1,5 +1,15 @@
 FROM debian:stretch-slim
 
+MAINTAINER zhengh@goodrain.com
+
+ENV DEBUG=1
+
+#update timezone
+ENV TZ=Asia/Shanghai
+
+# chinese- mirrors
+ADD ./sources.list  /etc/apt/sources.list
+
 RUN apt-get update \
 	&& apt-get install -y --no-install-recommends \
 		bzip2 \
@@ -81,8 +91,6 @@ RUN set -ex \
 	&& ruby -v \
 	&& ln -s /opt/goodrain/ruby-$RUBY_VERSION/bin/ruby /usr/local/bin/ruby \
 	&& ln -s /opt/goodrain/ruby-$RUBY_VERSION/bin/gem /usr/local/bin/gem \
-
-
 	&& make -j "$(nproc)" \
 	&& make install \
 	\

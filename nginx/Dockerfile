@@ -1,5 +1,12 @@
 FROM alpine:3.5
 
+MAINTAINER zhengh@goodrain.com
+
+ENV DEBUG=1
+
+#update timezone
+ENV TZ=Asia/Shanghai
+
 LABEL maintainer="NGINX Docker Maintainers <docker-maint@nginx.com>"
 
 ENV NGINX_VERSION 1.12.2
