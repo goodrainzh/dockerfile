@@ -1,13 +1,4 @@
 FROM debian:stretch-slim
-MAINTAINER zhengh@goodrain.com
-
-ENV DEBUG=1
-
-#update timezone
-ENV TZ=Asia/Shanghai
-
-# chinese- mirrors
-ADD ./sources.list  /etc/apt/sources.list
 
 RUN apt-get update \
 	&& apt-get install -y --no-install-recommends \
@@ -19,8 +10,8 @@ RUN apt-get update \
 		libyaml-dev \
 		procps \
 		zlib1g-dev \
-        rubygems &&\
-        rm -rf /var/lib/apt/lists/*
+		gedit \
+	&& rm -rf /var/lib/apt/lists/*
 
 # skip installing gem documentation
 RUN mkdir -p /usr/local/etc \
@@ -81,10 +72,17 @@ RUN set -ex \
 	&& autoconf \
 	&& gnuArch="$(dpkg-architecture --query DEB_BUILD_GNU_TYPE)" \
 	&& ./configure \
-        --prefix=/opt/goodrain/ruby-$RUBY_VERSION \
+		--prefix=/opt/goodrain/ruby-$RUBY_VERSION \
 		--build="$gnuArch" \
 		--disable-install-doc \
 		--enable-shared \
+# 指定新的目录需要创建链接
+	&& export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/opt/goodrain/ruby-$RUBY_VERSION " \
+	&& ruby -v \
+	&& ln -s /opt/goodrain/ruby-$RUBY_VERSION/bin/ruby /usr/local/bin/ruby \
+	&& ln -s /opt/goodrain/ruby-$RUBY_VERSION/bin/gem /usr/local/bin/gem \
+
+
 	&& make -j "$(nproc)" \
 	&& make install \
 	\
