@@ -1,7 +1,5 @@
 FROM debian:stretch-slim
 
-MAINTAINER zhengh@goodrain.com
-
 ENV DEBUG=1
 
 #update timezone
@@ -92,6 +90,9 @@ RUN set -xe; \
 
 COPY docker-php-source /usr/local/bin/
 
+ENV PATH="/opt/goodrain/php-$PHP_VERSION/bin:$PATH" 
+ENV PATH="/opt/goodrain/php-$PHP_VERSION/sbin:$PATH"
+
 RUN set -xe \
 	&& buildDeps=" \
 		$PHP_EXTRA_BUILD_DEPS \
@@ -141,10 +142,6 @@ RUN set -xe \
 		--with-libdir="lib/$debMultiarch" \
 		\
 		$PHP_EXTRA_CONFIGURE_ARGS \
-#php可执行目录
-	&& export PATH="/opt/goodrain/php-$PHP_VERSION/bin:$PATH" \
-	&& export PATH="/opt/goodrain/php-$PHP_VERSION/sbin:$PATH" \
-
 	&& make -j "$(nproc)" \
 	&& make install \
 	&& { find /usr/local/bin /usr/local/sbin -type f -executable -exec strip --strip-all '{}' + || true; } \
