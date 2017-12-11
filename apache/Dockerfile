@@ -16,6 +16,7 @@ RUN apt-get update \
 		libpcre++0v5 \
 		libssl-dev \
 		gnupg2 \
+		dirmngr \
 	&& rm -r /var/lib/apt/lists/*
 
 ENV HTTPD_VERSION 2.2.34
