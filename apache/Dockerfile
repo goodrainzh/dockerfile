@@ -13,8 +13,9 @@ RUN apt-get update \
 		libaprutil1-ldap \
 		libapr1-dev \
 		libaprutil1-dev \
-		libpcre++0 \
-		libssl1.0.0 \
+		libpcre++0v5 \
+		libssl \
+		gnupg2 \
 	&& rm -r /var/lib/apt/lists/*
 
 ENV HTTPD_VERSION 2.2.34
