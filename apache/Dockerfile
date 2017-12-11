@@ -1,30 +1,11 @@
-FROM debian:jessie-backports
+FROM debian:stretch-slim
 
-ENV DEBUG 1
 ENV HTTPD_PREFIX /opt/goodrain/apache2
 ENV PATH $HTTPD_PREFIX/bin:$PATH
 RUN mkdir -p "$HTTPD_PREFIX" \
 	&& chown www-data:www-data "$HTTPD_PREFIX"
 WORKDIR $HTTPD_PREFIX
 
-# library for mod_http2
-ENV NGHTTP2_VERSION 1.18.1-1
-ENV OPENSSL_VERSION 1.0.2l-1~bpo8+1
-RUN { \
-# add a negative "Pin-Priority" so that we never ever get packages from stretch unless we explicitly request them
-		echo 'Package: *'; \
-		echo 'Pin: release n=stretch'; \
-		echo 'Pin-Priority: -10'; \
-		echo; \
-# except nghttp2, which is the reason we're here
-		echo 'Package: libnghttp2*'; \
-		echo "Pin: version $NGHTTP2_VERSION"; \
-		echo 'Pin-Priority: 990'; \
-		echo; \
-	} > /etc/apt/preferences.d/unstable-nghttp2
-
-# install httpd runtime dependencies
-# https://httpd.apache.org/docs/2.4/install.html#requirements
 RUN apt-get update \
 	&& apt-get install -y --no-install-recommends \
 		libapr1 \
@@ -32,18 +13,15 @@ RUN apt-get update \
 		libaprutil1-ldap \
 		libapr1-dev \
 		libaprutil1-dev \
-		liblua5.2-0 \
-		libnghttp2-14=$NGHTTP2_VERSION \
-		libpcre++0v5 \
-		libssl1.0.0=$OPENSSL_VERSION \
-		libxml2 \
+		libpcre++0 \
+		libssl1.0.0 \
 	&& rm -r /var/lib/apt/lists/*
 
-ENV HTTPD_VERSION 2.4.29
-ENV HTTPD_SHA256 777753a5a25568a2a27428b2214980564bc1c38c1abf9ccc7630b639991f7f00
+ENV HTTPD_VERSION 2.2.34
+ENV HTTPD_SHA256 e53183d5dfac5740d768b4c9bea193b1099f4b06b57e5f28d7caaf9ea7498160
 
-# https://httpd.apache.org/security/vulnerabilities_24.html
-ENV HTTPD_PATCHES=""
+# https://httpd.apache.org/security/vulnerabilities_22.html
+ENV HTTPD_PATCHES="CVE-2017-9798-patch-2.2.patch 42c610f8a8f8d4d08664db6d9857120c2c252c9b388d56f238718854e6013e46"
 
 ENV APACHE_DIST_URLS \
 # https://issues.apache.org/jira/browse/INFRA-8753?focusedCommentId=14735394#comment-14735394
@@ -53,25 +31,19 @@ ENV APACHE_DIST_URLS \
 	https://www.apache.org/dist/ \
 	https://archive.apache.org/dist/
 
-# see https://httpd.apache.org/docs/2.4/install.html#requirements
+# see https://httpd.apache.org/docs/2.2/install.html#requirements
 RUN set -eux; \
 	\
-	# mod_http2 mod_lua mod_proxy_html mod_xml2enc
-	# https://anonscm.debian.org/cgit/pkg-apache/apache2.git/tree/debian/control?id=adb6f181257af28ee67af15fc49d2699a0080d4c
-	buildDeps=" \
+	buildDeps=' \
 		bzip2 \
 		ca-certificates \
 		dpkg-dev \
 		gcc \
-		liblua5.2-dev \
-		libnghttp2-dev=$NGHTTP2_VERSION \
 		libpcre++-dev \
-		libssl-dev=$OPENSSL_VERSION \
-		libxml2-dev \
-		zlib1g-dev \
+		libssl-dev \
 		make \
 		wget \
-	"; \
+	'; \
 	apt-get update; \
 	apt-get install -y --no-install-recommends -V $buildDeps; \
 	rm -r /var/lib/apt/lists/*; \
@@ -96,7 +68,7 @@ RUN set -eux; \
 # see https://httpd.apache.org/download.cgi#verify
 	ddist 'httpd.tar.bz2.asc' "httpd/httpd-$HTTPD_VERSION.tar.bz2.asc"; \
 	export GNUPGHOME="$(mktemp -d)"; \
-	gpg --keyserver ha.pool.sks-keyservers.net --recv-keys A93D62ECC3C8EA12DB220EC934EA76E6791485A8; \
+	gpg --keyserver ha.pool.sks-keyservers.net --recv-keys B1B96F45DFBDCCF974019235193F180AB55D9977; \
 	gpg --batch --verify httpd.tar.bz2.asc httpd.tar.bz2; \
 	rm -rf "$GNUPGHOME" httpd.tar.bz2.asc; \
 	\
@@ -121,7 +93,9 @@ RUN set -eux; \
 	./configure \
 		--build="$gnuArch" \
 		--prefix="$HTTPD_PREFIX" \
-		--enable-mods-shared=reallyall \
+# https://httpd.apache.org/docs/2.2/programs/configure.html
+# Caveat: --enable-mods-shared=all does not actually build all modules. To build all modules then, one might use:
+		--enable-mods-shared='all ssl ldap cache proxy authn_alias mem_cache file_cache authnz_ldap charset_lite dav_lock disk_cache' \
 	; \
 	make -j "$(nproc)"; \
 	make install; \
