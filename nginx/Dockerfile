@@ -34,7 +34,7 @@ RUN cd $BUILD_DIR \
 RUN cd $BUILD_DIR \
     && wget http://goodrain-pkg.oss-cn-shanghai.aliyuncs.com/dockerfile/ngnix/openssl-${OPENSSL_VERSION}.tar.gz \
     && tar -zxvf openssl-${OPENSSL_VERSION}.tar.gz \
-    && rm -rf 
+    && rm -rf openssl-${OPENSSL_VERSION}.tar.gz
 # nginx install
 RUN cd $BUILD_DIR \
     && wget http://goodrain-pkg.oss-cn-shanghai.aliyuncs.com/dockerfile/ngnix/nginx-${NGINX_VERSION}.tar.gz \
