@@ -14,7 +14,7 @@ RUN apt-get update \
 		libapr1-dev \
 		libaprutil1-dev \
 		libpcre++0v5 \
-		libssl \
+		libssl-dev \
 		gnupg2 \
 	&& rm -r /var/lib/apt/lists/*
 
