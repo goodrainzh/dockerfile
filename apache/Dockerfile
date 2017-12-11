@@ -1,5 +1,6 @@
-FROM debian:stretch-slim
+FROM debian:jessie-backports
 
+ENV DEBUG 1
 ENV HTTPD_PREFIX /opt/goodrain/apache2
 ENV PATH $HTTPD_PREFIX/bin:$PATH
 RUN mkdir -p "$HTTPD_PREFIX" \
