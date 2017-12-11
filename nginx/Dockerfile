@@ -1,18 +1,29 @@
 FROM debian:stretch-slim
 
-MAINTAINER zhengh@goodrain.com
-
 ENV DEBUG=1
-
 #update timezone
 ENV TZ=Asia/Shanghai
-
-ADD ./repositories /etc/apk/repositories
-
 ENV NGINX_VERSION 1.12.2
 
-RUN apt-get update \
-	&& apt-get install -y gnupg gnupg2
+RUN	&& apt-get install -y --no-install-recommends \
+		build-deps \
+		gnupg2 \
+		gpg \
+		openssl \
+		gettext-base \
+		gcc \
+		make \
+		curl \
+		openssl \
+		zlib1g-dev \
+		dirmngr \
+		libc-dev \
+		libxslt-dev \
+		libssl-dev \
+		libpcre3-dev \
+		libgd-dev \
+		libgeoip-dev \
+	&& rm -rf /var/lib/apt/lists/* 
 
 RUN GPG_KEYS=B0F4253373F8F6F510D42178520A9993A1C052F8 \
 	&& CONFIG="\
@@ -71,15 +82,6 @@ RUN GPG_KEYS=B0F4253373F8F6F510D42178520A9993A1C052F8 \
 		nginx-module-image-filter=${NGINX_VERSION} \
 		nginx-module-njs=${NJS_VERSION} \
 	" \
-	
-	&& apt-get install -y --no-install-recommends \
-		openssl \
-		gnupg2 \
-		gettext-base \
-		gcc \
-		libc-dev \
-		make \
-		curl \
 		libxslt-dev \
 	&& curl -fSL http://nginx.org/download/nginx-$NGINX_VERSION.tar.gz -o nginx.tar.gz \
 	&& curl -fSL http://nginx.org/download/nginx-$NGINX_VERSION.tar.gz.asc  -o nginx.tar.gz.asc \
@@ -139,8 +141,8 @@ RUN GPG_KEYS=B0F4253373F8F6F510D42178520A9993A1C052F8 \
 			| sort -u \
 			| awk 'system("[ -e /usr/local/lib/" $1 " ]") == 0 { next } { print "so:" $1 }' \
 	)" \
-	&& apt-get install -y --no-install-recommends $runDeps \
-	&& apt-get remove .build-deps \
+	&& apt-get remove build-deps \
+	&& apt-get remove gettext \
 	&& apt-get remove .gettext \
 	&& mv /tmp/envsubst /usr/local/bin/ \
 	\
