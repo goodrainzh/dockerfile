@@ -13,8 +13,8 @@ RUN apt-get update \
     && rm -r /var/lib/apt/lists/*
 
 RUN set -x \
-    && curl -k ${DOWNLOAD_URL}/php-${PHP_VERSION}-fpm.tar.gz | tar xz -C / \
-    && curl -k ${DOWNLOAD_URL}/php-${NGINX_VERSION}-fpm.tar.gz | tar xz -C /
+    && curl -k ${DOWNLOAD_URL}/nginx-${NGINX_VERSION}-jessie.tar.gz | tar xz -C / \
+    && curl -k ${DOWNLOAD_URL}/php-${PHP_VERSION}-fpm-jessie.tar.gz | tar xz -C /
 
 RUN set -x \
     && groupadd  -g 200 rain \
